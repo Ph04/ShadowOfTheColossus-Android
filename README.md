@@ -32,6 +32,12 @@ Para preparar os arquivos necessários ao próximo passo de ligação/recompila�
 
 O perfil estrito aceita apenas PAL **SCES-53326 v1.00**. A ferramenta confere SYSTEM.CNF, o ELF de boot e os três módulos XFF por tamanho e SHA-256. Os arquivos extraídos ficam em build/game-input, ignorado pelo Git. Consulte [docs/ISO_WORKFLOW.md](docs/ISO_WORKFLOW.md).
 
+Para executar a primeira etapa de ligação dos módulos XFF localmente:
+
+    python tools/link_xff.py --files build/game-input --out build/xff-linked
+
+Essa etapa valida e aplica as relocações MIPS conhecidas, gera os segmentos relocados e preserva os imports ainda não resolvidos para uma futura ligação em tempo de execução. Ela ainda não produz o ELF final nem código C++; veja [docs/XFF_LINKER.md](docs/XFF_LINKER.md).
+
 ## Build local
 
 Requisitos: JDK 17, Gradle 9.6.0, Android SDK Platform 36, NDK 30.0.16248370 e CMake 3.22.1.
@@ -46,6 +52,7 @@ Para inicializar o submódulo:
 
 - [Arquitetura](docs/ARCHITECTURE.md)
 - [Validação e preparação do disco](docs/ISO_WORKFLOW.md)
+- [Parser e linker XFF2](docs/XFF_LINKER.md)
 - [Plano de port](docs/ROADMAP.md)
 - [Backend gráfico](docs/GRAPHICS_BACKEND.md)
 - [Compilação](docs/BUILDING.md)

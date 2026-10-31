@@ -21,6 +21,14 @@ A revisão consultada também informa que o processo de build gera o código C++
 
 A configuração CMake dessa revisão detecta ANDROID e desativa analyzer/recompiler/testes/studio para o alvo móvel, mantendo o runtime. Isso não representa suporte completo ao jogo: o ponto de entrada Android ainda é um TODO e o renderer GS da aplicação PC depende de um contexto OpenGL criado em Windows.
 
+## Referências Android ARM64 e GS
+
+- [Tenkaichi3DecompAndroid](https://github.com/dfdx047/Tenkaichi3DecompAndroid): referência arquitetural para launcher Android, biblioteca de jogo ARM64 e separação entre runtime recompilado e Graphics Synthesizer. A documentação BT4 descreve o envio de eventos/transferências do GS por ring buffer e uma opção de renderer ARMSX2 em modo live. O projeto declara AGPL-3.0; nenhum código foi copiado para este repositório.
+- [AetherSX2](https://github.com/Trixarian/NetherSX2-patch): referência histórica para emulação PS2 em Android. Os espelhos públicos consultados não disponibilizam a implementação proprietária completa do renderer; não é uma base para copiar o renderer integral.
+- [ARMSX2](https://github.com/ARMSX2/ARMSX2): referência aberta baseada em PCSX2 e orientada a ARM64, com caminhos gráficos Vulkan/OpenGL. A licença declarada é GPL-3.0; qualquer incorporação ou ligação direta exigiria revisão de licença e validação da compatibilidade da interface GS. Não é dependência deste projeto.
+
+Esses projetos são referências de arquitetura e comportamento, não componentes integrados. A implementação gráfica continuará desacoplada até que os eventos GIF/VIF/DMA, registradores GS e sincronização do PS2Recomp tenham um contrato validado.
+
 ## Regra de atualização
 
 Não mover o submódulo automaticamente para a branch mais recente. Ao atualizar, registrar SHA novo, revisar mudanças em CMake, runtime, IOP, GS, VU e ferramentas, e só então ajustar os patches Android. Nunca atualizar a versão fixada silenciosamente.

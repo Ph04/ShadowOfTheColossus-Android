@@ -22,8 +22,10 @@
 
 ## M2 — Pipeline de recompilação do jogo
 
-- [ ] Implementar ligação dos três módulos XFF nos endereços do perfil.
-- [ ] Aplicar relocations MIPS (R_MIPS_32, R_MIPS_26, HI16/LO16).
+- [x] Implementar parser XFF2 com validação de limites, seções, símbolos e tabelas de relocação.
+- [x] Aplicar as quatro relocations MIPS do perfil e resolver imports exportados por módulos anteriores.
+- [x] Gerar seções relocadas, manifesto local e lista de imports ainda não resolvidos para o runtime.
+- [ ] Validar os módulos XFF reais contra dump de RAM do PCSX2/ARMSX2 em estado conhecido.
 - [ ] Gerar mapa de funções e símbolos para o PS2Recomp.
 - [ ] Gerar ELF ligado e arquivo TOML do recompiler.
 - [ ] Gerar código C++ no host e manter a saída fora do Git.

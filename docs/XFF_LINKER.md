@@ -1,0 +1,44 @@
+# XFF2 parser and relocation stage
+
+## Scope
+
+This stage implements the container parser and the module-order relocation pass for the PAL retail profile `SCES-53326 v1.00`. The boot ELF and all three XFF inputs must come from a locally prepared copy of that exact disc build; the tools verify each module's expected size and SHA-256 before parsing it.
+
+The implementation is host-side Python. No ISO, ELF, XFF module, generated object, or game asset is stored in the repository.
+
+## Format handling
+
+`tools/xff2.py` reads the `xff2` header and its file-offset tables, then validates section headers, biased image pointers (`0x40010000 + file offset`), string references, symbol indexes, relocation descriptors, target sections, and every relocation site. The supported relocation records are the four used by this game build:
+
+- `R_MIPS_32` (2)
+- `R_MIPS_26` (4)
+- `R_MIPS_HI16` (5)
+- `R_MIPS_LO16` (6)
+
+HI16 records are paired with a later LO16 for the same symbol, with MIPS signed-low carry adjustment. Modules are linked in loader order: KERNEL, MANAGER, GAMECORE. Exports from earlier modules resolve imports in later modules. An import that is still unresolved uses the documented loader trap address `0x001B28F8` for the link-time image, and its original word, patched word, symbol, relocation kind, module, and guest address are preserved in `runtime_relocations.json` for a later runtime-linking implementation.
+
+## Run locally
+
+First extract the four inputs using the disc validator:
+
+```sh
+python3 tools/inspect_disc.py /path/to/your/SCES-53326.iso --extract-dir build/game-input
+```
+
+Then run the XFF relocation stage:
+
+```sh
+python3 tools/link_xff.py --files build/game-input --out build/xff-linked
+```
+
+Outputs are local-only and ignored by Git:
+
+- `link_manifest.json`: module addresses, entry points, loaded sections, symbol/relocation counts, and unresolved imports.
+- `runtime_relocations.json`: import relocation sites kept for future runtime rebinding.
+- `sections/*.bin`: section bytes after the static relocations have been applied.
+
+## Validation boundary
+
+The synthetic test suite verifies table bounds, symbol parsing, section indexing, module-order export resolution, and all four relocation types. It does **not** prove that the real disc modules link byte-for-byte correctly. That requires a locally supplied matching disc and comparison against a PCSX2/ARMSX2 guest-memory dump at a known game state.
+
+This stage does not yet emit the merged ELF consumed by `ps2_analyzer` / `ps2recomp`. The next M2 increment is to construct that ELF with correct guest addresses, load segments, symbols and boot entry, then run the pinned PS2Recomp analyzer/recompiler and validate function coverage. Dynamic relocation handling for imports later supplied by the game's data archive remains a runtime responsibility.

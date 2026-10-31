@@ -58,5 +58,7 @@
       "bss": "0x012E5540"
     }
   ],
+  "undefined_import_stub": "0x001B28F8",
+  "undefined_import_stub_source": "Loader trap address documented by the pinned reference port in Docs/XFF_FORMAT.md",
   "profile_source": "LightVelox/sotc-vibe-pc tag v0.2.0-preview.2, Docs/GAME_BUILD.md and Port/profile/SCES-53326_v1.00.json"
 }
