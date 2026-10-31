@@ -1,0 +1,7 @@
+* text=auto eol=lf
+*.bat text eol=crlf
+*.sh text eol=lf
+*.gradle.kts text eol=lf
+*.cmake text eol=lf
+*.cpp text eol=lf
+*.h text eol=lf

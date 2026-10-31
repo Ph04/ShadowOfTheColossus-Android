@@ -1,0 +1,38 @@
+# Android / Gradle
+.gradle/
+**/build/
+**/.cxx/
+local.properties
+*.iml
+.idea/
+.DS_Store
+
+# Native build products
+out/
+cmake-build-*/
+compile_commands.json
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+*.exe
+*.apk
+*.aab
+
+# Private game media and generated code — never commit these
+Game/
+game/*.iso
+game/*.bin
+game/*.elf
+game/*.img
+assets/private/
+generated/
+**/generated/
+*.ps2iso
+*.chd
+
+# Editor / temporary files
+*.swp
+*.tmp
+*.log

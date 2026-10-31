@@ -1,0 +1,4 @@
+[submodule "external/PS2Recomp"]
+\tpath = external/PS2Recomp
+\turl = https://github.com/LightVelox/PS2Recomp.git
+\tbranch = main
