@@ -43,7 +43,7 @@ bool readBoth16(const uint8_t* p, uint16_t& value) {
 std::string normalizeComponent(std::string value) {
     const size_t version = value.find(';');
     if (version != std::string::npos) value.resize(version);
-    while (!value.empty() && (value.back() == ' ' || value.back() == '\\0')) value.pop_back();
+    while (!value.empty() && (value.back() == ' ' || value.back() == '\0')) value.pop_back();
     std::transform(value.begin(), value.end(), value.begin(),
                    [](unsigned char c) { return static_cast<char>(std::toupper(c)); });
     return value;
@@ -61,7 +61,7 @@ std::string normalizePath(std::string_view input) {
         component.clear();
     };
     for (char c : input) {
-        if (c == '/' || c == '\\\\') flush();
+        if (c == '/' || c == '\\') flush();
         else component.push_back(c);
     }
     flush();
