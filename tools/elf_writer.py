@@ -10,15 +10,15 @@ from typing import Iterable
 
 try:
     from .xff2 import (
-    SHN_ABS,
-    SHN_UNDEF,
-    SHT_NOBITS,
-    SHT_PROGBITS,
-    STB_LOCAL,
-    STT_FUNC,
-    STT_SECTION,
-    XffFormatError,
-    XffModule,
+        SHN_ABS,
+        SHN_UNDEF,
+        SHT_NOBITS,
+        SHT_PROGBITS,
+        STB_LOCAL,
+        STT_FUNC,
+        STT_SECTION,
+        XffFormatError,
+        XffModule,
         LinkedModule,
     )
 except ImportError:  # direct execution from the tools directory
@@ -416,9 +416,12 @@ def write_recompiler_config(path: Path, elf_path: str = "sotc_linked.elf",
                             map_path: str = "sotc_functions.csv",
                             reloc_path: str = "runtime_relocations.csv") -> None:
     """Write a PS2Recomp config using paths relative to this config file."""
+    # The CSV currently contains named functions only. Do not feed it to
+    # ghidra_output until anonymous function boundaries are also authoritative:
+    # PS2Recomp filters heuristic starts when a Ghidra map is supplied.
     content = f'''[general]
 input = "{elf_path}"
-ghidra_output = "{map_path}"
+ghidra_output = ""
 runtime_relocations = "{reloc_path}"
 output = "generated"
 single_file_output = false

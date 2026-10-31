@@ -3,6 +3,7 @@ from __future__ import annotations
 import struct
 import unittest
 
+from tools.link_xff import write_runtime_relocation_csv
 from tools.xff2 import (
     POINTER_BIAS,
     R_MIPS_26,
@@ -134,6 +135,20 @@ class Xff2ParserTests(unittest.TestCase):
         self.assertEqual(linked.unresolved_imports[0]["symbol"], "external")
 
 
+
+    def test_runtime_relocation_csv_uses_only_supported_code_kinds(self) -> None:
+        module = XffModule("KERNEL", make_xff())
+        linked = XffLinker(undefined_stub=0x001B28F8).link(module, 0x1000, 0x3000)
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "runtime_relocations.csv"
+            count, omitted_w32 = write_runtime_relocation_csv(path, [linked])
+            self.assertEqual(count, 2)
+            self.assertEqual(omitted_w32, 0)
+            lines = path.read_text(encoding="utf-8").splitlines()
+            self.assertEqual(lines[0], "address,kind,module,symbol")
+            self.assertEqual(lines[1], "0x00001108,hi16,KERNEL,external")
+            self.assertEqual(lines[2], "0x0000110C,lo16,KERNEL,external")
+
     def test_later_module_export_supersedes_earlier_export(self) -> None:
         first_raw = bytearray(make_xff())
         struct.pack_into("<IIIBBH", first_raw, 0x190, 1, 4, 4, 0x12, 0, 1)
@@ -151,7 +166,8 @@ class Xff2ParserTests(unittest.TestCase):
         linker.link(first, 0x1000, 0x3000)
         linker.link(later, 0x5000, 0x7000)
         self.assertEqual(linker.exports["external"], 0x5108)
-        self.assertEqual(linker.duplicate_exports[-1]["selected"], "0x00005108")
+        external_override = next(item for item in linker.duplicate_exports if item["name"] == "external")
+        self.assertEqual(external_override["selected"], "0x00005108")
 
     def test_exports_resolve_imports_in_later_modules(self) -> None:
         first_raw = bytearray(make_xff())

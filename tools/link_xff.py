@@ -12,13 +12,13 @@ import sys
 
 try:
     from .xff2 import (
-    R_MIPS_26,
-    R_MIPS_32,
-    R_MIPS_HI16,
-    R_MIPS_LO16,
-    SHN_UNDEF,
-    XffFormatError,
-    XffLinker,
+        R_MIPS_26,
+        R_MIPS_32,
+        R_MIPS_HI16,
+        R_MIPS_LO16,
+        SHN_UNDEF,
+        XffFormatError,
+        XffLinker,
         XffModule,
     )
     from .elf_writer import (

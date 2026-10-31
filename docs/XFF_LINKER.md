@@ -34,12 +34,14 @@ python3 tools/link_xff.py --files build/game-input --out build/xff-linked
 Outputs are local-only and ignored by Git:
 
 - `sotc_linked.elf`: ELF32 little-endian MIPS executable with the retail boot entry, allocated boot/module sections, load segments, and a merged symbol table.
-- `sotc_functions.csv`: named function ranges from XFF function symbols and KERNEL's absolute boot-ELF symbols, in the CSV layout accepted by the pinned PS2Recomp parser.
+- `sotc_functions.csv`: named-function inventory from XFF function symbols and KERNEL's absolute boot-ELF symbols, in the CSV syntax accepted by PS2Recomp. It is intentionally not wired into `ghidra_output` yet because it does not claim boundaries for anonymous functions; passing an incomplete Ghidra map makes PS2Recomp discard heuristic function starts.
 - `runtime_relocations.csv`: code import sites (`j26`, `hi16`, `lo16`) passed to PS2Recomp for runtime rebinding. The pinned parser does not accept `w32`, so R_MIPS_32 code sites are counted in the manifest but omitted from this CSV.
 - `sotc_recomp.toml`: initial PS2Recomp configuration pointing to the ELF, function map and runtime relocation list.
 - `runtime_relocations.json`: static unresolved-import report, including the link-time trap word and original instruction word.
 - `link_manifest.json`: module addresses, entry points, allocated sections, counts, output ELF hash and known limitations.
 - `sections/*.bin`: section bytes after the static relocations have been applied.
+
+The generated TOML leaves `ghidra_output` empty on purpose so the pinned analyzer can retain its own heuristic discoveries for anonymous/static functions. The CSV is retained for inspection and later expansion into a complete authoritative map.
 
 Run the generated recompilation configuration from the output directory, using a host build of the pinned PS2Recomp revision:
 
