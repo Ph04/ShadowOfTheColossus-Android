@@ -46,6 +46,13 @@ jobs:
           printf '%s\n' "$analyzer_help" | grep -q "Usage: ps2_analyzer"
           printf '%s\n' "$recomp_help" | grep -q "Usage: ps2recomp <config.toml>"
 
+      - name: Run synthetic ELF through analyzer and recompiler
+        run: |
+          python3 tools/smoke_ps2recomp.py \
+            --analyzer build/ps2recomp-host/ps2xAnalyzer/ps2_analyzer \
+            --recompiler build/ps2recomp-host/ps2xRecomp/ps2_recomp \
+            --workdir build/ps2recomp-smoke
+
       - name: Upload host tools
         uses: actions/upload-artifact@v4
         with:
