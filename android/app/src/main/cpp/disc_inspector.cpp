@@ -71,7 +71,7 @@ bool verifyHash(Iso9660Reader& iso, const ExpectedFile& expected,
     }
     if (expected.xff) {
         std::vector<uint8_t> header;
-        if (!iso.readFile(entry, header, 4, error)) return false;
+        if (!iso.readFile(entry, header, expected.size, error)) return false;
         if (header.size() != 4 || header[0] != 'x' || header[1] != 'f' ||
             header[2] != 'f' || header[3] != '2') {
             error = std::string(expected.path) + ": cabeçalho xff2 ausente.";
@@ -100,7 +100,7 @@ bool parseBootConfig(const std::vector<uint8_t>& bytes,
         if (key == "BOOT2" || (key == "BOOT" && boot.empty())) {
             const size_t colon = value.find(':');
             std::string path = colon == std::string::npos ? value : value.substr(colon + 1);
-            std::replace(path.begin(), path.end(), '\\\\', '/');
+            std::replace(path.begin(), path.end(), '\\', '/');
             const size_t slash = path.find_last_of('/');
             if (slash != std::string::npos) path.erase(0, slash + 1);
             const size_t semicolon = path.find(';');
