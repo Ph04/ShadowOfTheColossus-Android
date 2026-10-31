@@ -113,7 +113,7 @@ bool Iso9660Reader::open(std::string& error) {
         while (!volumeId_.empty() && volumeId_.back() == ' ') volumeId_.pop_back();
 
         const uint8_t* root = sector.data() + 156;
-        if (root[0] < 34 || root[0] > 34 || (root[25] & 0x02u) == 0) {
+        if (root[0] != 34 || (root[25] & 0x02u) == 0) {
             error = "Registro do diretório raiz ISO9660 inválido.";
             return false;
         }
