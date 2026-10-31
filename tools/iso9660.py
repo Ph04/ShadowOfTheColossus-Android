@@ -40,12 +40,12 @@ def _both32(data: bytes, offset: int) -> int:
 
 
 def _component(value: str) -> str:
-    return value.split(";", 1)[0].rstrip(" \\x00").upper()
+    return value.split(";", 1)[0].rstrip(" \x00").upper()
 
 
 def normalize_path(value: str) -> str:
     return "/".join(
-        part for part in (_component(p) for p in value.replace("\\\\", "/").split("/")) if part
+        part for part in (_component(p) for p in value.replace("\\", "/").split("/")) if part
     )
 
 
@@ -145,7 +145,7 @@ class Iso9660:
             name = record[33:33 + name_len]
             offset += record_size
 
-            if name_len == 1 and name in (b"\\x00", b"\\x01"):
+            if name_len == 1 and name in (b"\x00", b"\x01"):
                 continue
             if flags & 0x80:
                 raise ValueError("multi-extent ISO9660 files are not supported")
