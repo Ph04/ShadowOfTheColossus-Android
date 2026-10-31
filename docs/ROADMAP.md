@@ -7,28 +7,31 @@
 - [x] Criar Activity Android, JNI e alvo CMake.
 - [x] Implementar seleção da imagem com SAF e descritor nativo.
 - [x] Implementar inicialização Vulkan, swapchain e frame de teste.
-- [ ] Confirmar build APK pelo GitHub Actions.
+- [x] Compilar e publicar o artefato APK debug ARM64 pela CI.
 - [ ] Validar instalação e ciclo de vida em dispositivo físico.
 
 ## M1 — Leitura e identificação do disco
 
-- [ ] Verificar assinatura e estrutura ISO9660.
-- [ ] Identificar o executável de boot e a revisão de disco suportada.
-- [ ] Validar hashes e intervalos dos módulos conforme o perfil upstream.
-- [ ] Adicionar logs nativos úteis sem expor dados pessoais do URI.
-- [ ] Testar provedores SAF diferentes e descritores com offset.
+- [x] Verificar descritores, blocos e diretórios ISO9660.
+- [x] Identificar SYSTEM.CNF, executável de boot e versão PAL SCES-53326 v1.00.
+- [x] Validar formato do ELF, endereço de entrada e hash SHA-256.
+- [x] Validar tamanho, assinatura xff2 e SHA-256 de KERNEL, MANAGER e GAMECORE.
+- [x] Criar ferramenta host para verificar a imagem e extrair os quatro insumos de recompilação.
+- [x] Manter a ISO e os binários extraídos fora do Git.
+- [ ] Testar validação Android com imagem legítima em dispositivo físico.
 
 ## M2 — Pipeline de recompilação do jogo
 
-- [ ] Adaptar as ferramentas de geração para ambiente host (Windows/Linux).
-- [ ] Gerar código C++ localmente a partir da mídia fornecida pelo usuário.
-- [ ] Manter os arquivos gerados fora do Git.
-- [ ] Compilar objetos ARM64 com NDK.
-- [ ] Separar geração host-side e execução Android.
+- [ ] Implementar ligação dos três módulos XFF nos endereços do perfil.
+- [ ] Aplicar relocations MIPS (R_MIPS_32, R_MIPS_26, HI16/LO16).
+- [ ] Gerar mapa de funções e símbolos para o PS2Recomp.
+- [ ] Gerar ELF ligado e arquivo TOML do recompiler.
+- [ ] Gerar código C++ no host e manter a saída fora do Git.
+- [ ] Compilar objetos ARM64 com NDK e ligar ao runtime.
 
 ## M3 — Runtime PS2
 
-- [ ] Adaptar o ponto de entrada e o ciclo de vida do runtime.
+- [ ] Adaptar o ponto de entrada e ciclo de vida do runtime.
 - [ ] Ligar scheduler/threads e memória do Emotion Engine.
 - [ ] Integrar IOP, SIF, DMA, VIF, VU0/VU1, CDVD e SPU2.
 - [ ] Implementar suspensão/retomada e encerramento limpo.

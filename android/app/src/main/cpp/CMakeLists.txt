@@ -8,6 +8,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 add_library(sotc_android SHARED
     jni_bridge.cpp
     iso_source.cpp
+    iso9660.cpp
+    sha256.cpp
+    disc_inspector.cpp
     vulkan_renderer.cpp
 )
 

@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "game": "Shadow of the Colossus",
+  "serial": "SCES-53326",
+  "region": "PAL (Europe, Australia)",
+  "version": "1.00",
+  "disc": {
+    "format": "ISO9660",
+    "sector_size": 2048,
+    "volume_sectors": 2263632,
+    "size_bytes": 4635918336,
+    "md5": "13871262c004856b175c0ea3ac65a430",
+    "sha1": "34c3f1b4fbe6f9a340720cbc02cbe6947c817d73",
+    "sha256": "068925770645266189005f09c9a9a1fee25726bfc93c89b12f832f3673664ac4"
+  },
+  "system_cnf": {
+    "path": "SYSTEM.CNF",
+    "size_bytes": 56,
+    "sha256": "ae6f63bb6476d90bd568724b1e25fea9fd145596f61c4a3de25d963c2918d893"
+  },
+  "boot_elf": {
+    "path": "SCES_533.26",
+    "size_bytes": 229888,
+    "sha256": "851f0c4f48b0b4bb61e89fb7e97d4e9b4ac4c2ea0ff143d1d95e18337ea8b57c",
+    "elf_class": 1,
+    "endianness": "little",
+    "machine": "MIPS",
+    "entry_point": "0x00100010"
+  },
+  "startup": {
+    "path": "STARTUP.XFF",
+    "size_bytes": 26,
+    "sha256": "661bef7e10930b3470defd778e3cb811c61070bea51d82d341ad7dc5151701aa"
+  },
+  "ee_modules": [
+    {
+      "name": "KERNEL",
+      "path": "KERNEL.XFF",
+      "size_bytes": 419668,
+      "sha256": "d83a2d4d7631ed740946849b1b4ba32620891fc41817bb16175fedb9f9cd6463",
+      "load_base": "0x001A5400",
+      "bss": "0x001EFA00"
+    },
+    {
+      "name": "MANAGER",
+      "path": "MANAGER.XFF",
+      "size_bytes": 1732264,
+      "sha256": "2de4d80eed7ff6c89b34b587ee1ced8792921e2a7c80d7e92a4fbb1481f1461a",
+      "load_base": "0x0116BC40",
+      "bss": "0x0131E040"
+    },
+    {
+      "name": "GAMECORE",
+      "path": "GAMECORE.XFF",
+      "size_bytes": 2157144,
+      "sha256": "aa5a72b239b36da0bfc9f435bf31441057b4f4b8a01405b94b0e3b212fd242e0",
+      "load_base": "0x013442C0",
+      "bss": "0x012E5540"
+    }
+  ],
+  "profile_source": "LightVelox/sotc-vibe-pc tag v0.2.0-preview.2, Docs/GAME_BUILD.md and Port/profile/SCES-53326_v1.00.json"
+}

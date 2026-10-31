@@ -26,11 +26,15 @@ game/*.iso
 game/*.bin
 game/*.elf
 game/*.img
+game/input/
+game/extracted/
 assets/private/
 generated/
 **/generated/
 *.ps2iso
 *.chd
+*.xff
+*.irx
 
 # Editor / temporary files
 *.swp
