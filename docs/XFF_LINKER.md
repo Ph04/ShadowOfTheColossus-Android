@@ -4,7 +4,7 @@
 
 This stage implements the container parser and the module-order relocation pass for the PAL retail profile `SCES-53326 v1.00`. The boot ELF and all three XFF inputs must come from a locally prepared copy of that exact disc build; the tools verify each module's expected size and SHA-256 before parsing it.
 
-The implementation is host-side Python. No ISO, ELF, XFF module, generated object, or game asset is stored in the repository.
+The repository keeps host-side Python tools for development tests and includes a native C++ implementation in the Android app. The APK performs the same preparation on-device and invokes the pinned PS2Recomp static library compiled for ARM64. No ISO, ELF, XFF module, generated object, or game asset is stored in the repository.
 
 ## Format handling
 
@@ -17,9 +17,13 @@ The implementation is host-side Python. No ISO, ELF, XFF module, generated objec
 
 HI16 records are paired with a later LO16 for the same symbol, with MIPS signed-low carry adjustment. Modules are linked in loader order: KERNEL, MANAGER, GAMECORE. Exports from earlier modules resolve imports in later modules. An import that is still unresolved uses the documented loader trap address `0x001B28F8` for the link-time image, and its original word, patched word, symbol, relocation kind, module, and guest address are preserved in `runtime_relocations.json` for a later runtime-linking implementation.
 
-## Run locally
+## Run in the Android app
 
-First extract the four inputs using the disc validator:
+Select the matching ISO in the app and tap **Preparar e recompilar neste telefone**. The APK validates the media, extracts the four linker inputs into its private storage, runs the XFF2 linker and ELF writer, then calls PS2Recomp in-process. A progress panel shows the stage, percentage, functions processed, and estimated remaining time when the counters allow a useful estimate. The generated artifacts and C++ source can be exported in a ZIP.
+
+## Run the developer tools on a computer
+
+For development or reproducibility, first extract the four inputs using the disc validator:
 
 ```sh
 python3 tools/inspect_disc.py /path/to/your/SCES-53326.iso --extract-dir build/game-input
@@ -51,7 +55,7 @@ cd build/xff-linked
 /path/to/ps2recomp sotc_recomp.toml
 ```
 
-PS2Recomp's analyzer/recompiler are host tools. The Android CI currently compiles the app and runs Python tests; it does not run the full game recompiler because a matching local disc image is required.
+The Android app compiles and invokes the PS2Recomp recompiler library for ARM64. The host workflow also builds the Linux command-line tools for synthetic integration testing. A matching local disc is still required for a real game run; synthetic tests do not verify the actual game modules.
 
 ## Validation boundary
 

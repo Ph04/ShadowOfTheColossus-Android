@@ -11,6 +11,9 @@ add_library(sotc_android SHARED
     iso9660.cpp
     sha256.cpp
     disc_inspector.cpp
+    xff_linker.cpp
+    elf_writer.cpp
+    on_device_pipeline.cpp
     vulkan_renderer.cpp
 )
 
@@ -34,24 +37,6 @@ target_link_libraries(sotc_android PRIVATE
     vulkan
 )
 
-# Keep PS2Recomp isolated until its Android host layer and GS backend are adapted.
-option(SOTC_LINK_PS2_RUNTIME "Build and link the upstream PS2Recomp runtime" OFF)
-
-if(SOTC_LINK_PS2_RUNTIME)
-    set(PS2X_BUILD_RECOMP OFF CACHE BOOL "" FORCE)
-    set(PS2X_BUILD_RUNTIME ON CACHE BOOL "" FORCE)
-    set(PS2X_BUILD_ANALYZER OFF CACHE BOOL "" FORCE)
-    set(PS2X_BUILD_TEST OFF CACHE BOOL "" FORCE)
-    set(PS2X_BUILD_STUDIO OFF CACHE BOOL "" FORCE)
-    set(PS2X_ENABLE_DEBUG_UI OFF CACHE BOOL "" FORCE)
-    set(PS2X_ENABLE_FFMPEG OFF CACHE BOOL "" FORCE)
-    set(PS2X_ENABLE_SCCACHE OFF CACHE BOOL "" FORCE)
-
-    add_subdirectory(
-        ${CMAKE_CURRENT_LIST_DIR}/../../../../../external/PS2Recomp
-        ${CMAKE_CURRENT_BINARY_DIR}/ps2recomp
-        EXCLUDE_FROM_ALL
-    )
-    target_link_libraries(sotc_android PRIVATE ps2_runtime)
-    target_compile_definitions(sotc_android PRIVATE SOTC_HAS_PS2_RUNTIME=1)
-endif()
+# Build the upstream recompiler as an in-process Android ARM64 library.
+# The command-line executable target is excluded; JNI calls PS2Recompiler directly.
+include(${CMAKE_CURRENT_LIST_DIR}/enable_ps2recomp_android.cmake)

@@ -18,7 +18,9 @@
 - [x] Validar tamanho, assinatura xff2 e SHA-256 de KERNEL, MANAGER e GAMECORE.
 - [x] Criar ferramenta host para verificar a imagem e extrair os quatro insumos de recompilação.
 - [x] Manter a ISO e os binários extraídos fora do Git.
-- [ ] Testar validação Android com imagem legítima em dispositivo físico.
+- [x] Integrar validação de mídia diretamente no aplicativo Android.
+- [x] Extrair os arquivos exigidos no armazenamento privado do aplicativo, sem copiar a ISO inteira.
+- [ ] Testar com imagem legítima em dispositivo físico.
 
 ## M2 — Pipeline de recompilação do jogo
 
@@ -30,8 +32,13 @@
 - [x] Gerar mapa de funções e símbolos a partir dos símbolos XFF disponíveis.
 - [x] Gerar ELF32/MIPS unificado com entry point, PT_LOAD, seções BSS e tabela de símbolos.
 - [x] Gerar configuração TOML e lista de relocations dinâmicas suportadas pelo PS2Recomp.
-- [ ] Executar ps2_analyzer/ps2recomp com dados reais e revisar cobertura de funções.
-- [ ] Gerar código C++ no host e manter a saída fora do Git.
+- [x] Compilar a biblioteca PS2Recomp para ARM64 e chamá-la pelo JNI, sem executar binários Linux.
+- [x] Executar a etapa de recompilação de funções no próprio aplicativo.
+- [x] Exibir progresso, contagem de funções processadas e estimativa de tempo.
+- [x] Exportar ELF, relatórios, configuração e código C++ em um ZIP local.
+- [ ] Validar o resultado com a mídia real e comparar com dump de RAM do emulador.
+- [ ] Revisar cobertura/erros do código gerado e adaptar os módulos do jogo ao runtime Android.
+- [ ] Compilar objetos gerados ARM64 e ligá-los ao runtime Android.
 - [ ] Compilar objetos ARM64 com NDK e ligar ao runtime.
 
 ## M3 — Runtime PS2
