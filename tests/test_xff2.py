@@ -133,6 +133,26 @@ class Xff2ParserTests(unittest.TestCase):
         self.assertEqual(len(linked.unresolved_imports), 2)
         self.assertEqual(linked.unresolved_imports[0]["symbol"], "external")
 
+
+    def test_later_module_export_supersedes_earlier_export(self) -> None:
+        first_raw = bytearray(make_xff())
+        struct.pack_into("<IIIBBH", first_raw, 0x190, 1, 4, 4, 0x12, 0, 1)
+        struct.pack_into("<I", first_raw, 0x38, 0)
+        struct.pack_into("<I", first_raw, 0x64, 0)
+        first = XffModule("KERNEL", first_raw)
+
+        later_raw = bytearray(make_xff())
+        struct.pack_into("<IIIBBH", later_raw, 0x190, 1, 8, 4, 0x12, 0, 1)
+        struct.pack_into("<I", later_raw, 0x38, 0)
+        struct.pack_into("<I", later_raw, 0x64, 0)
+        later = XffModule("MANAGER", later_raw)
+
+        linker = XffLinker(undefined_stub=0x001B28F8)
+        linker.link(first, 0x1000, 0x3000)
+        linker.link(later, 0x5000, 0x7000)
+        self.assertEqual(linker.exports["external"], 0x5108)
+        self.assertEqual(linker.duplicate_exports[-1]["selected"], "0x00005108")
+
     def test_exports_resolve_imports_in_later_modules(self) -> None:
         first_raw = bytearray(make_xff())
         # Turn symbol 1 (external) into a global function export at .text+0x4.

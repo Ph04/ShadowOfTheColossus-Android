@@ -414,9 +414,15 @@ class XffLinker:
                     continue
             previous = self.exports.get(symbol.name)
             if previous is not None and previous != address:
-                self.duplicate_exports.append({"name": symbol.name, "kept": f"0x{previous:08X}", "ignored": f"0x{address:08X}", "module": module.name})
-            else:
-                self.exports.setdefault(symbol.name, address)
+                self.duplicate_exports.append({
+                    "name": symbol.name,
+                    "previous": f"0x{previous:08X}",
+                    "selected": f"0x{address:08X}",
+                    "module": module.name,
+                })
+            # Match the loader's sequential symbol table: a later module's export
+            # supersedes an earlier export for modules loaded after it.
+            self.exports[symbol.name] = address
 
         self.modules.append(linked)
         return linked
