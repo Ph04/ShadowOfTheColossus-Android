@@ -1,11 +1,11 @@
 #include "disc_inspector.h"
 #include "iso9660.h"
+#include "sha256.h"
 
 #include <algorithm>
 #include <cctype>
 #include <cstdint>
 #include <sstream>
-#include <string_view>
 #include <vector>
 
 namespace {
@@ -14,8 +14,9 @@ constexpr uint32_t kExpectedVolumeSectors = 2263632u;
 constexpr const char* kSerial = "SCES-53326";
 constexpr const char* kVersion = "1.00";
 constexpr const char* kBootPath = "SCES_533.26";
-constexpr const char* kBootSha = "851f0c4f48b0b4bb61e89fb7e97d4e9b4ac4c2ea0ff143d1d95e18337ea8b57c";
 constexpr uint32_t kBootSize = 229888u;
+constexpr const char* kSystemSha = "ae6f63bb6476d90bd568724b1e25fea9fd145596f61c4a3de25d963c2918d893";
+constexpr const char* kBootSha = "851f0c4f48b0b4bb61e89fb7e97d4e9b4ac4c2ea0ff143d1d95e18337ea8b57c";
 
 struct ExpectedFile {
     const char* path;
@@ -24,6 +25,10 @@ struct ExpectedFile {
     bool xff;
 };
 
+constexpr ExpectedFile kStartup = {
+    "STARTUP.XFF", 26u,
+    "661bef7e10930b3470defd778e3cb811c61070bea51d82d341ad7dc5151701aa", false
+};
 constexpr ExpectedFile kModules[] = {
     {"KERNEL.XFF", 419668u, "d83a2d4d7631ed740946849b1b4ba32620891fc41817bb16175fedb9f9cd6463", true},
     {"MANAGER.XFF", 1732264u, "2de4d80eed7ff6c89b34b587ee1ced8792921e2a7c80d7e92a4fbb1481f1461a", true},
@@ -59,15 +64,15 @@ bool verifyHash(Iso9660Reader& iso, const ExpectedFile& expected,
     Iso9660Entry entry;
     if (!readEntry(iso, expected.path, entry, error)) return false;
     if (entry.size != expected.size) {
-        error = std::string(expected.path) + ": tamanho incorreto (") +
+        error = std::string(expected.path) + ": tamanho incorreto (" +
                 std::to_string(entry.size) + " bytes; esperado " +
                 std::to_string(expected.size) + ").";
         return false;
     }
     if (expected.xff) {
         std::vector<uint8_t> header;
-        if (!iso.readFile(entry, header, expected.size, error)) return false;
-        if (header.size() < 4 || header[0] != 'x' || header[1] != 'f' ||
+        if (!iso.readFile(entry, header, 4, error)) return false;
+        if (header.size() != 4 || header[0] != 'x' || header[1] != 'f' ||
             header[2] != 'f' || header[3] != '2') {
             error = std::string(expected.path) + ": cabeçalho xff2 ausente.";
             return false;
@@ -135,6 +140,16 @@ bool inspectShadowOfTheColossusDisc(const IsoSource& source,
 
     Iso9660Entry systemEntry;
     if (!readEntry(iso, "SYSTEM.CNF", systemEntry, error)) return false;
+    if (systemEntry.size != 56u) {
+        error = "SYSTEM.CNF possui tamanho inesperado.";
+        return false;
+    }
+    std::string systemHash;
+    if (!iso.hashFile(systemEntry, systemHash, error)) return false;
+    if (systemHash != kSystemSha) {
+        error = "SHA-256 de SYSTEM.CNF não corresponde ao perfil SCES-53326 v1.00.";
+        return false;
+    }
     std::vector<uint8_t> systemCnf;
     if (!iso.readFile(systemEntry, systemCnf, 64u * 1024u, error)) return false;
 
@@ -175,6 +190,7 @@ bool inspectShadowOfTheColossusDisc(const IsoSource& source,
         return false;
     }
 
+    if (!verifyHash(iso, kStartup, error)) return false;
     for (const auto& module : kModules) {
         if (!verifyHash(iso, module, error)) return false;
     }
@@ -184,7 +200,7 @@ bool inspectShadowOfTheColossusDisc(const IsoSource& source,
     inspection.version = kVersion;
     inspection.bootExecutable = kBootPath;
     inspection.summary = "Disco validado: Shadow of the Colossus PAL " + inspection.serial +
-        " v" + inspection.version + ". ELF de boot e os três módulos XFF conferem com os hashes SHA-256.";
+        " v" + inspection.version + ". ELF de boot, STARTUP.XFF e os três módulos EE conferem com os hashes SHA-256.";
     error.clear();
     return true;
 }
