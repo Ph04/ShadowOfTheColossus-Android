@@ -1,4 +1,3 @@
-#define VK_USE_PLATFORM_ANDROID_KHR
 #include "vulkan_renderer.h"
 
 #include <vulkan/vulkan.h>
@@ -230,10 +229,17 @@ bool VulkanRenderer::createDevice(std::string& error) {
         VkPhysicalDeviceFragmentShaderInterlockFeaturesEXT interlock{
             VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADER_INTERLOCK_FEATURES_EXT
         };
-        VkPhysicalDeviceFeatures2 features{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2};
-        features.pNext = &interlock;
-        vkGetPhysicalDeviceFeatures2(state_->physicalDevice, &features);
-        state_->fragmentInterlock = interlock.fragmentShaderPixelInterlock == VK_TRUE;
+        // Android's Vulkan loader may expose core Vulkan 1.1 entry points only
+        // through vkGetInstanceProcAddr; do not create a direct shared-library
+        // reference to vkGetPhysicalDeviceFeatures2.
+        const auto getFeatures2 = reinterpret_cast<PFN_vkGetPhysicalDeviceFeatures2>(
+            vkGetInstanceProcAddr(state_->instance, "vkGetPhysicalDeviceFeatures2"));
+        if (getFeatures2 != nullptr) {
+            VkPhysicalDeviceFeatures2 features{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2};
+            features.pNext = &interlock;
+            getFeatures2(state_->physicalDevice, &features);
+            state_->fragmentInterlock = interlock.fragmentShaderPixelInterlock == VK_TRUE;
+        }
     }
 
     const float priority = 1.0f;
@@ -409,7 +415,6 @@ bool VulkanRenderer::createFrameSync(std::string& error) {
     }
 
     VkFenceCreateInfo fence{VK_STRUCTURE_TYPE_FENCE_CREATE_INFO};
-    fence.flags = VK_FENCE_CREATE_SIGNALED_BIT;
     result = vkCreateFence(state_->device, &fence, nullptr, &state_->acquireFence);
     if (result != VK_SUCCESS) {
         error = std::string("vkCreateFence: ") + resultName(result);
