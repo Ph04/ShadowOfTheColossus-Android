@@ -16,17 +16,17 @@ def both16(value: int) -> bytes:
 
 
 def directory_record(lba: int, size: int, name: bytes, is_dir: bool = False) -> bytes:
-    record = bytearray(33)
-    record[1:9] = both32(lba)
+    record_size = 33 + len(name) + (1 if len(name) % 2 == 0 else 0)
+    record = bytearray(record_size)
+    record[0] = record_size
+    record[1] = 0
+    record[2:10] = both32(lba)
     record[10:18] = both32(size)
     record[25] = 2 if is_dir else 0
     record[28:32] = both16(1)
     record[32] = len(name)
-    record.extend(name)
-    if len(name) % 2 == 0:
-        record.append(0)
-    return bytes([len(record)]) + bytes(record)
-
+    record[33:33 + len(name)] = name
+    return bytes(record)
 
 def pad_directory(records: list[bytes]) -> bytes:
     data = b"".join(records)
