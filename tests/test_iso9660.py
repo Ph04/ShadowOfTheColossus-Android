@@ -42,7 +42,7 @@ def make_test_iso(path: Path) -> None:
     pvd[40:72] = b"UNIT TEST DISC".ljust(32, b" ")
     pvd[80:88] = both32(24)
     pvd[128:132] = both16(SECTOR_SIZE)
-    pvd[156:190] = directory_record(20, SECTOR_SIZE, b"\\x00", True)
+    pvd[156:190] = directory_record(20, SECTOR_SIZE, b"\x00", True)
     image[16 * SECTOR_SIZE:17 * SECTOR_SIZE] = pvd
 
     terminator = bytearray(SECTOR_SIZE)
@@ -51,18 +51,18 @@ def make_test_iso(path: Path) -> None:
     terminator[6] = 1
     image[17 * SECTOR_SIZE:18 * SECTOR_SIZE] = terminator
 
-    system_cnf = b"BOOT2 = cdrom0:\\\\SCES_533.26;1\\r\\nVER = 1.00\\r\\nVMODE = PAL\\r\\n"
+    system_cnf = b"BOOT2 = cdrom0:\\SCES_533.26;1\r\nVER = 1.00\r\nVMODE = PAL\r\n"
     image[21 * SECTOR_SIZE:21 * SECTOR_SIZE + len(system_cnf)] = system_cnf
     nested = pad_directory([
-        directory_record(22, SECTOR_SIZE, b"\\x00", True),
-        directory_record(20, SECTOR_SIZE, b"\\x01", True),
+        directory_record(22, SECTOR_SIZE, b"\x00", True),
+        directory_record(20, SECTOR_SIZE, b"\x01", True),
         directory_record(23, 11, b"INFO.TXT;1"),
     ])
     image[22 * SECTOR_SIZE:23 * SECTOR_SIZE] = nested
     image[23 * SECTOR_SIZE:23 * SECTOR_SIZE + 11] = b"hello world"
     root = pad_directory([
-        directory_record(20, SECTOR_SIZE, b"\\x00", True),
-        directory_record(20, SECTOR_SIZE, b"\\x01", True),
+        directory_record(20, SECTOR_SIZE, b"\x00", True),
+        directory_record(20, SECTOR_SIZE, b"\x01", True),
         directory_record(21, len(system_cnf), b"SYSTEM.CNF;1"),
         directory_record(22, SECTOR_SIZE, b"DATA", True),
     ])
