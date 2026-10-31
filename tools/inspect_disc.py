@@ -25,7 +25,7 @@ def parse_system_cnf(data: bytes) -> dict[str, str]:
 
 
 def normalize_boot_path(value: str) -> str:
-    value = value.replace("\\\\", "/")
+    value = value.replace("\\", "/")
     if ":" in value:
         value = value.split(":", 1)[1]
     return value.rsplit("/", 1)[-1].split(";", 1)[0].strip().upper()
@@ -51,7 +51,7 @@ def verify_boot_elf(iso: Iso9660, profile: dict) -> dict:
     if entry is None or entry.is_dir or entry.size != spec["size_bytes"]:
         raise ValueError("boot ELF missing or has an unexpected size")
     header = iso.read_at(entry.lba * 2048, 52)
-    if header[:4] != b"\\x7fELF" or header[4] != spec["elf_class"] or header[5] != 1:
+    if header[:4] != b"\x7fELF" or header[4] != spec["elf_class"] or header[5] != 1:
         raise ValueError("boot file is not little-endian ELF32")
     machine = struct.unpack_from("<H", header, 18)[0]
     entry_point = struct.unpack_from("<I", header, 24)[0]
@@ -137,7 +137,7 @@ def inspect_disc(path: Path, profile: dict, extract_dir: Path | None,
             "generated_files_are_local_only": True,
         }
         (extract_dir / "input_manifest.json").write_text(
-            json.dumps(manifest, indent=2) + "\\n", encoding="utf-8"
+            json.dumps(manifest, indent=2) + "\n", encoding="utf-8"
         )
     return result
 
