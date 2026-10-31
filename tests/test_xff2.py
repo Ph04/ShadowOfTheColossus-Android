@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import struct
+import tempfile
 import unittest
+from pathlib import Path
 
 from tools.link_xff import write_runtime_relocation_csv
 from tools.xff2 import (
