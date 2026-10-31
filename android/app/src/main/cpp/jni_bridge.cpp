@@ -79,7 +79,7 @@ extern "C" JNIEXPORT jstring JNICALL
 Java_org_ph04_sotcandroid_MainActivity_nativeStatus(JNIEnv* env, jclass) {
     std::lock_guard<std::mutex> lock(g_mutex);
     std::string message = g_iso.description();
-    if (!g_discSummary.empty()) message += "\\n" + g_discSummary;
+    if (!g_discSummary.empty()) message += "\n" + g_discSummary;
     if (!g_lastError.empty()) message += "\\nFalha na validação: " + g_lastError;
     message += "\\n" + g_renderer.status();
     return env->NewStringUTF(message.c_str());
