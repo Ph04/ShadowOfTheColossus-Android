@@ -56,6 +56,43 @@ def sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+def collect_runtime_import_sites(modules) -> list[dict]:
+    """Keep every undefined-symbol relocation, including kinds PS2Recomp cannot currently consume."""
+    kind_names = {
+        R_MIPS_32: "w32",
+        R_MIPS_26: "j26",
+        R_MIPS_HI16: "hi16",
+        R_MIPS_LO16: "lo16",
+    }
+    records: list[dict] = []
+    for linked in modules:
+        module = linked.module
+        for table in module.relocation_tables:
+            target = module.sections[table.target_section]
+            if target.image_offset is None:
+                continue
+            target_address = linked.section_addresses.get(target.index)
+            if target_address is None:
+                continue
+            for relocation in table.entries:
+                symbol = module.symbols[relocation.symbol_index]
+                if symbol.section_index != SHN_UNDEF:
+                    continue
+                image_position = target.image_offset + relocation.offset
+                link_word = struct.unpack_from("<I", linked.image, image_position)[0]
+                records.append({
+                    "module": module.name,
+                    "section": target.name,
+                    "address": f"0x{target_address + relocation.offset:08X}",
+                    "kind": kind_names.get(relocation.type, f"mips_{relocation.type}"),
+                    "symbol": symbol.name,
+                    "original_word": f"0x{relocation.original_word:08X}",
+                    "link_time_word": f"0x{link_word:08X}",
+                })
+    records.sort(key=lambda item: (int(item["address"], 0), item["module"], item["section"]))
+    return records
+
+
 def write_runtime_relocation_csv(path: Path, modules) -> tuple[int, int]:
     """Emit only code-site kinds understood by the pinned PS2Recomp runtime-relocation parser."""
     rows: list[tuple[int, str, str, str]] = []
@@ -172,6 +209,13 @@ def link_disc_modules(files_dir: Path, profile_path: Path, output_dir: Path,
 
     runtime_csv_path = output_dir / "runtime_relocations.csv"
     runtime_site_count, unsupported_word_relocations = write_runtime_relocation_csv(runtime_csv_path, linked)
+    runtime_import_sites = collect_runtime_import_sites(linked)
+    runtime_import_sites_path = output_dir / "runtime_import_sites.json"
+    runtime_import_sites_path.write_text(json.dumps({
+        "format": "sotc-runtime-import-sites-v1",
+        "profile": f"{profile['serial']} v{profile['version']}",
+        "entries": runtime_import_sites,
+    }, indent=2) + "\n", encoding="utf-8")
 
     relocation_output = {
         "format": "sotc-runtime-relocations-v1",
@@ -199,6 +243,8 @@ def link_disc_modules(files_dir: Path, profile_path: Path, output_dir: Path,
         "named_function_count": function_count,
         "runtime_relocations": runtime_csv_path.name,
         "runtime_relocation_site_count": runtime_site_count,
+        "runtime_import_sites": runtime_import_sites_path.name,
+        "runtime_import_site_count": len(runtime_import_sites),
         "runtime_relocation_r_mips_32_not_supported_by_ps2recomp": unsupported_word_relocations,
         "modules": manifest_modules,
         "exports_resolved": len(linker.exports),

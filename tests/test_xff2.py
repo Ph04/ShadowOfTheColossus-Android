@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from tools.link_xff import write_runtime_relocation_csv
+from tools.link_xff import collect_runtime_import_sites, write_runtime_relocation_csv
 from tools.xff2 import (
     POINTER_BIAS,
     R_MIPS_26,
@@ -137,6 +137,17 @@ class Xff2ParserTests(unittest.TestCase):
         self.assertEqual(linked.unresolved_imports[0]["symbol"], "external")
 
 
+
+
+    def test_runtime_import_report_preserves_all_undefined_sites(self) -> None:
+        module = XffModule("KERNEL", make_xff())
+        linked = XffLinker(undefined_stub=0x001B28F8).link(module, 0x1000, 0x3000)
+        records = collect_runtime_import_sites([linked])
+        self.assertEqual(len(records), 2)
+        self.assertEqual(records[0]["address"], "0x00001108")
+        self.assertEqual(records[0]["kind"], "hi16")
+        self.assertEqual(records[0]["symbol"], "external")
+        self.assertEqual(records[0]["original_word"], "0x3C080000")
 
     def test_runtime_relocation_csv_uses_only_supported_code_kinds(self) -> None:
         module = XffModule("KERNEL", make_xff())

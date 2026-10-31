@@ -6,6 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from tools.verify_linked_ram import compare_elf_to_ram
 from tools.elf_writer import (
     ImageSection,
     ImageSymbol,
@@ -48,6 +49,41 @@ class ElfWriterTests(unittest.TestCase):
         self.assertEqual(sections[0].name, ".boot.text")
         self.assertEqual(sections[0].data, bytes(range(16)))
         self.assertTrue(sections[0].is_code)
+
+
+    def test_ram_verifier_masks_dynamic_words_but_detects_other_differences(self) -> None:
+        sections = [
+            ImageSection(".boot.text", 0x00100000, b"A" * 16, 16,
+                         SHT_PROGBITS, 0x6, 4),
+            ImageSection(".text.kernel", 0x00100100, b"B" * 32, 32,
+                         SHT_PROGBITS, 0x6, 4),
+            ImageSection(".kernel.rodata", 0x00100200, b"C" * 16, 16,
+                         SHT_PROGBITS, 0x2, 4),
+            ImageSection(".kernel.data", 0x00100300, b"D" * 16, 16,
+                         SHT_PROGBITS, 0x3, 4),
+            ImageSection(".bss.kernel", 0x00100400, None, 16,
+                         SHT_NOBITS, 0x3, 4),
+        ]
+        with tempfile.TemporaryDirectory() as temp:
+            elf_path = Path(temp) / "linked.elf"
+            write_elf32_mips(elf_path, 0x00100000, 0x20924001, sections, [])
+            elf = elf_path.read_bytes()
+            ram = bytearray(0x00110000)
+            for section in sections:
+                if section.data is not None:
+                    ram[section.address:section.address + section.size] = section.data
+
+            dynamic_site = 0x00100104
+            ram[dynamic_site] ^= 0xFF
+            masked = compare_elf_to_ram(elf, bytes(ram), {dynamic_site})
+            self.assertTrue(masked["passed"])
+            self.assertEqual(masked["ignored_dynamic_relocation_words"], 1)
+
+            ram[0x00100100] ^= 0x01
+            mismatch = compare_elf_to_ram(elf, bytes(ram), {dynamic_site})
+            self.assertFalse(mismatch["passed"])
+            self.assertEqual(mismatch["different_words"], 1)
+            self.assertEqual(mismatch["first_differences"][0]["address"], "0x00100100")
 
     def test_writes_elf32_mips_with_loadable_bss_and_symbols(self) -> None:
         sections = [
