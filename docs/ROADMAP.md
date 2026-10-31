@@ -26,8 +26,10 @@
 - [x] Aplicar as quatro relocations MIPS do perfil e resolver imports exportados por módulos anteriores.
 - [x] Gerar seções relocadas, manifesto local e lista de imports ainda não resolvidos para o runtime.
 - [ ] Validar os módulos XFF reais contra dump de RAM do PCSX2/ARMSX2 em estado conhecido.
-- [ ] Gerar mapa de funções e símbolos para o PS2Recomp.
-- [ ] Gerar ELF ligado e arquivo TOML do recompiler.
+- [x] Gerar mapa de funções e símbolos a partir dos símbolos XFF disponíveis.
+- [x] Gerar ELF32/MIPS unificado com entry point, PT_LOAD, seções BSS e tabela de símbolos.
+- [x] Gerar configuração TOML e lista de relocations dinâmicas suportadas pelo PS2Recomp.
+- [ ] Executar ps2_analyzer/ps2recomp com dados reais e revisar cobertura de funções.
 - [ ] Gerar código C++ no host e manter a saída fora do Git.
 - [ ] Compilar objetos ARM64 com NDK e ligar ao runtime.
 

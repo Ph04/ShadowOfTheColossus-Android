@@ -36,7 +36,7 @@ Para executar a primeira etapa de ligação dos módulos XFF localmente:
 
     python tools/link_xff.py --files build/game-input --out build/xff-linked
 
-Essa etapa valida e aplica as relocações MIPS conhecidas, gera os segmentos relocados e preserva os imports ainda não resolvidos para uma futura ligação em tempo de execução. Ela ainda não produz o ELF final nem código C++; veja [docs/XFF_LINKER.md](docs/XFF_LINKER.md).
+Essa etapa valida e aplica as relocações MIPS conhecidas, combina o ELF de boot com os segmentos relocados, gera o mapa de funções e prepara o TOML do PS2Recomp. Ela ainda não executa a análise/recompilação nem compila código C++; veja [docs/XFF_LINKER.md](docs/XFF_LINKER.md).
 
 ## Build local
 
