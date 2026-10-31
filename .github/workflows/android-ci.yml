@@ -19,6 +19,9 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Test host ISO9660 and disc tools
+        run: python3 -m unittest discover -s tests -p 'test_*.py' -v
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
