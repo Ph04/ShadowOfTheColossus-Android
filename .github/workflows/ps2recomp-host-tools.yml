@@ -37,11 +37,14 @@ jobs:
         run: cmake --build build/ps2recomp-host --target ps2_analyzer ps2_recomp --parallel 2
 
       - name: Check tool executables
+        shell: bash
         run: |
           test -x build/ps2recomp-host/ps2xAnalyzer/ps2_analyzer
           test -x build/ps2recomp-host/ps2xRecomp/ps2_recomp
-          build/ps2recomp-host/ps2xAnalyzer/ps2_analyzer 2>&1 | grep -q "Usage: ps2_analyzer"
-          build/ps2recomp-host/ps2xRecomp/ps2_recomp 2>&1 | grep -qi "usage\|config"
+          analyzer_help="$(build/ps2recomp-host/ps2xAnalyzer/ps2_analyzer 2>&1 || true)"
+          recomp_help="$(build/ps2recomp-host/ps2xRecomp/ps2_recomp 2>&1 || true)"
+          printf '%s\n' "$analyzer_help" | grep -q "Usage: ps2_analyzer"
+          printf '%s\n' "$recomp_help" | grep -q "Usage: ps2recomp <config.toml>"
 
       - name: Upload host tools
         uses: actions/upload-artifact@v4
